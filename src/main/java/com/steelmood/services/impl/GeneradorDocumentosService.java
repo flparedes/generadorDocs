@@ -57,13 +57,19 @@ public class GeneradorDocumentosService {
 	 * @param context
 	 */
 	public void cargarImagenes(IXDocReport report, Map<String, String> variables, IContext context) {
-		FieldsMetadata metadata = new FieldsMetadata();
-		for (Map.Entry<String, String> variable : variables.entrySet()) {
-			metadata.addFieldAsImage(variable.getKey());
-			context.put(variable.getKey(), new FileImageProvider(new File(variable.getValue()), true));
+		if (variables != null && !variables.isEmpty()) {
+			FieldsMetadata metadata = report.getFieldsMetadata();
+			if (metadata == null) {
+				metadata = new FieldsMetadata();
+			}
+			
+			for (Map.Entry<String, String> variable : variables.entrySet()) {
+				metadata.addFieldAsImage(variable.getKey());
+				context.put(variable.getKey(), new FileImageProvider(new File(variable.getValue()), true));
+			}
+	
+			report.setFieldsMetadata(metadata);
 		}
-
-		report.setFieldsMetadata(metadata);
 	}
 
 	/**
@@ -83,12 +89,32 @@ public class GeneradorDocumentosService {
 	public byte[] generarDocumento(String rutaPlantilla, TemplateEngineKind templateEngine,
 			Map<String, Object> variablesMap, Map<String, String> imagenesPathMap, boolean convertirPdf)
 					throws IOException, XDocReportException {
+		return this.generarDocumento(rutaPlantilla, templateEngine, variablesMap, imagenesPathMap, convertirPdf, null);
+	}
+
+	/**
+	 * Toma la plantilla y devuelve un documento de salida como byte[]
+	 * 
+	 * @param rutaPlantilla
+	 * @param templateEngine
+	 *            Template Engine: Freemarker or Velocity
+	 * @param variablesMap
+	 * @param imagenesPathMap
+	 * @param convertirPdf
+	 *            Indica si se quiere convertir el documento a PDF
+	 * @return
+	 * @throws IOException
+	 * @throws XDocReportException
+	 */
+	public byte[] generarDocumento(String rutaPlantilla, TemplateEngineKind templateEngine,
+			Map<String, Object> variablesMap, Map<String, String> imagenesPathMap, boolean convertirPdf, FieldsMetadata metadatos)
+					throws IOException, XDocReportException {
 		// Cargar el fichero y configurar el Template Engine
 		InputStream inputStream = loadDocumentAsStream(rutaPlantilla);
 		IXDocReport xdocReport = XDocReportRegistry.getRegistry().loadReport(inputStream, templateEngine);
-
+		
 		// Se crea el contexto y se cargan las variables de reemplazo
-		IContext context = xdocReport.createContext();
+		IContext context = xdocReport.createContext();		
 		cargarVariables(variablesMap, context);
 		cargarImagenes(xdocReport, imagenesPathMap, context);
 

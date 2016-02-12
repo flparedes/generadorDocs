@@ -1,12 +1,15 @@
 package com.steelmood.services;
 
+import static org.junit.Assert.assertNotNull;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import com.steelmood.services.impl.GeneradorDocumentosService;
 
@@ -65,25 +68,8 @@ public class GeneradorDocumentosServiceTest {
 	 * @throws IOException
 	 */
 	@Test
-	public void testOdtPdf() throws IOException, XDocReportException {
-		// La conversión a PDF desde Docx no se puede hacer.
-		String rutaPlantilla = "Prueba.odt";
-		String extension = "pdf";
-		
-		this.generarDocumento(rutaPlantilla, extension, true);
-	}
-	
-	/**
-	 * Test method for
-	 * {@link com.steelmood.services.impl.GeneradorDocumentosService#mergeAndGenerateOutput(java.lang.String, fr.opensagres.xdocreport.template.TemplateEngineKind, java.util.Map, java.util.Map)}
-	 * .
-	 * 
-	 * @throws XDocReportException
-	 * @throws IOException
-	 */
-	@Test
 	public void testDocxPdf() throws IOException, XDocReportException {
-		// La conversión a PDF desde Docx no se puede hacer.
+		// La conversiï¿½n a PDF desde Docx no se puede hacer.
 		String rutaPlantilla = "Prueba.docx";
 		String extension = "pdf";
 		
@@ -108,7 +94,24 @@ public class GeneradorDocumentosServiceTest {
 	}
 	
 	/**
-	 * Genera el documento pasandole la ruta de la plantilla y la extensión.
+	 * Test method for
+	 * {@link com.steelmood.services.impl.GeneradorDocumentosService#mergeAndGenerateOutput(java.lang.String, fr.opensagres.xdocreport.template.TemplateEngineKind, java.util.Map, java.util.Map)}
+	 * .
+	 * 
+	 * @throws XDocReportException
+	 * @throws IOException
+	 */
+	@Test
+	public void testOdtPdf() throws IOException, XDocReportException {
+		// La conversiï¿½n a PDF desde Docx no se puede hacer.
+		String rutaPlantilla = "Prueba.odt";
+		String extension = "pdf";
+		
+		this.generarDocumento(rutaPlantilla, extension, true);
+	}
+	
+	/**
+	 * Genera el documento pasandole la ruta de la plantilla y la extensiï¿½n.
 	 * @param rutaPlantilla
 	 * @param extension
 	 * @throws IOException
@@ -121,6 +124,8 @@ public class GeneradorDocumentosServiceTest {
 		variablesMap.put("nombre", NOMBRE);
 		variablesMap.put("texto", TEXTO);
 		variablesMap.put("autor", AUTOR);
+		variablesMap.put("Numero", new Numero(1L));
+		variablesMap.put("Numeros", this.construirListaNumeros());
 		
 		// Mapa con las variables de tipo imagen. Estas variables contienen el path de la imagen
 		Map<String, String> imagenesMap = new HashMap<String, String>();
@@ -128,7 +133,9 @@ public class GeneradorDocumentosServiceTest {
 
 		GeneradorDocumentosService generadorDocumentosService = new GeneradorDocumentosService();
 		byte[] mergedOutput = generadorDocumentosService.generarDocumento(rutaPlantilla,
-				TemplateEngineKind.Freemarker, variablesMap, imagenesMap, convertirPdf);
+				TemplateEngineKind.Freemarker, variablesMap, imagenesMap, convertirPdf
+				//,metadatos
+				);
 		
 		// Se comprueba que se ha generado el documento
 		assertNotNull(mergedOutput);
@@ -139,4 +146,33 @@ public class GeneradorDocumentosServiceTest {
 		os.flush();
 		os.close();
 	}
+    
+    private List<Numero> construirListaNumeros() {
+    	List<Numero> numeros = new LinkedList<Numero>();
+    	for (int i = 1; i< 10; i++) {
+    		numeros.add(new Numero(Long.valueOf(i)));
+    	}
+    	return numeros;
+    }
+    
+    public class Numero {
+
+    	private Long numero;
+
+    	public Numero(Long numero) {
+    		this.numero = numero;
+    	}
+
+    	public Long getNumero() {
+    		return this.numero;
+    	}
+
+    	public Long getCuadrado() {
+    		return this.numero * this.numero;
+    	}
+
+    	public Double getRaiz() {
+    		return Math.sqrt(this.numero);
+    	}
+    }
 }
