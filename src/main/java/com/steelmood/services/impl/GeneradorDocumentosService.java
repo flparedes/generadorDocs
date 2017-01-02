@@ -53,7 +53,7 @@ public class GeneradorDocumentosService {
 	 * el objeto report los metadatos de las imágenes.
 	 * 
 	 * @param report
-	 * @param variablesToBeReplaced
+	 * @param variables 
 	 * @param context
 	 */
 	public void cargarImagenes(IXDocReport report, Map<String, String> variables, IContext context) {
@@ -112,6 +112,9 @@ public class GeneradorDocumentosService {
 		// Cargar el fichero y configurar el Template Engine
 		InputStream inputStream = loadDocumentAsStream(rutaPlantilla);
 		IXDocReport xdocReport = XDocReportRegistry.getRegistry().loadReport(inputStream, templateEngine);
+		
+		// Se cargan los metadatos
+		xdocReport.setFieldsMetadata(metadatos);
 		
 		// Se crea el contexto y se cargan las variables de reemplazo
 		IContext context = xdocReport.createContext();		

@@ -15,6 +15,7 @@ import com.steelmood.services.impl.GeneradorDocumentosService;
 
 import fr.opensagres.xdocreport.core.XDocReportException;
 import fr.opensagres.xdocreport.template.TemplateEngineKind;
+import fr.opensagres.xdocreport.template.formatter.FieldsMetadata;
 
 public class GeneradorDocumentosServiceTest {
 	
@@ -126,15 +127,23 @@ public class GeneradorDocumentosServiceTest {
 		variablesMap.put("autor", AUTOR);
 		variablesMap.put("Numero", new Numero(1L));
 		variablesMap.put("Numeros", this.construirListaNumeros());
+		variablesMap.put("listaNumeros", this.construirListaNumeros());
+		
+		// 2) Create fields metadata to manage lazy loop (#forech velocity)
+        // for table row.
+        FieldsMetadata metadata = new FieldsMetadata();
+        metadata.addFieldAsList("listaNumeros.Numero");
+        metadata.addFieldAsList("listaNumeros.Cuadrado");
+        metadata.addFieldAsList("listaNumeros.Raiz");
 		
 		// Mapa con las variables de tipo imagen. Estas variables contienen el path de la imagen
 		Map<String, String> imagenesMap = new HashMap<String, String>();
-		imagenesMap.put("header_image_logo", "Logo_Steelmood.jpg");
+		imagenesMap.put("header_image_logo", "./Logo.png");
 
 		GeneradorDocumentosService generadorDocumentosService = new GeneradorDocumentosService();
 		byte[] mergedOutput = generadorDocumentosService.generarDocumento(rutaPlantilla,
 				TemplateEngineKind.Freemarker, variablesMap, imagenesMap, convertirPdf
-				//,metadatos
+				, metadata
 				);
 		
 		// Se comprueba que se ha generado el documento
